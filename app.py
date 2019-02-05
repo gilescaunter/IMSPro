@@ -2,7 +2,8 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_pymongo import PyMongo
-import pymongo
+from flask import render_template
+
 
 app = Flask(__name__)
 
@@ -17,11 +18,15 @@ def get_all_vehicles():
     output = []
     for v in vehicle.find():
         output.append({'regNo': v['regNo']})
-    return jsonify({'result': output})
+        output.append({'vin': v['vin']})
+
+        #output.append({'vehicleSpecification.manufacturer': v['vehicleSpecification.manufacturer']})
+#    return jsonify({'result': output})
+    return render_template('vehicles.html', vehicles=output)
 
 @app.route('/')
 def index():
-    return "hello flask"
+    return render_template('index.html')
 
 @app.route('/view')
 def view():

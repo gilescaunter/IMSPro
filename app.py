@@ -16,12 +16,27 @@ mongo = PyMongo(app)
 def get_all_vehicles():
     vehicle = mongo.db.vehicles
     output = []
-    for v in vehicle.find():
-        output.append({'regNo': v['regNo']})
-        output.append({'vin': v['vin']})
-
-        #output.append({'vehicleSpecification.manufacturer': v['vehicleSpecification.manufacturer']})
-#    return jsonify({'result': output})
+    for v in vehicle.find(projection = {'regNo':1, 'vehicleSpecification.manufacturer':1,'status.0.processName':1}):
+        line = {}
+        line['regNo'] = v.get('regNo','-')
+        if 'vehicleSpecification.manufacturer' in v:
+            line['manufacturer'] = v['vehicleSpecification']['manufacturer']
+        else:
+            line['manufacturer'] = '-'
+        if 'vehicleSpecification.model' in v:
+            line['model'] = v['vehicleSpecification']['model']
+        else:
+            line['model'] = '-'
+        if 'vehicleSpecification.colourDescription' in v:
+            line['colour'] = v['vehicleSpecification']['colourDescription']
+        else:
+            line['colour'] = '-'
+        if 'status.0.processName' in v:
+            line['status'] = ['status'][0]['processName']
+        else:
+            line['status'] = '-'
+        line['price'] = '0.00'
+        output.append(line)
     return render_template('vehicles.html', vehicles=output)
 
 @app.route('/')
